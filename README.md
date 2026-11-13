@@ -62,9 +62,21 @@ The source contains two related transformer designs: one combines element tokens
 
 ## Research plan
 
+### Recommended starting dataset: ContextDP
+
+[ContextDP](https://github.com/SageSELab/AidUI/tree/master/evaluation/evaluation_dataset) is the recommended starting point for a screenshot-based experiment. It includes web and mobile screenshots with dark-pattern categories and bounding-box annotations, making it suitable for comparing text-only, visual, and UI-element approaches. The [AidUI paper](https://arxiv.org/abs/2303.06782) describes its construction and evaluation.
+
+- **Access:** [Download the dataset archive](https://github.com/SageSELab/AidUI/releases/download/v-ICSE'23-data/AidUI-Evaluation-Dataset.tar.gz). The images and annotations are also available in the AidUI repository under `evaluation/evaluation_dataset/`, separated into `web` and `mobile` directories. Each has an `images/` directory and a `result.json` annotation file.
+- **Size:** The authors report 162 web and 339 mobile screenshots, depicting 301 dark-pattern and 243 non-dark-pattern instances. These are instance counts, not counts of positive and negative screenshots; a screenshot can contain multiple instances.
+- **Annotations:** The JSON files contain image metadata, category IDs, and instance bounding boxes. Categories differ between the web and mobile subsets; both include `NO DP`. Review how instance annotations should become screenshot-level labels before training.
+- **Text:** The inspected annotation files do not include transcribed UI text. Extract it from screenshots with OCR or OmniParser for the text baseline and review extraction quality.
+- **Scope and limitations:** ContextDP is small and consists of static screenshots. It cannot establish behavior across a user journey, such as whether cancellation succeeds. Check category frequencies and source identities before creating splits; group related screenshots by website or app where that information is available. Confirm dataset reuse terms before redistribution or publication; the repository's code license does not by itself establish rights to every screenshot.
+
+The source README reports 544 instances, while the two annotation files contain 546 annotation records in total. Resolve this discrepancy and inspect `NO DP` annotations before calculating class counts or interpreting negatives. The dataset has not yet been imported or processed in this project.
+
 ### 1. Prepare and standardize data
 
-Evaluate the document's candidate sources: AidUI / ContextDP, Dark Patterns at Scale, and custom labeled screenshots. Check the available modalities and annotations before selecting a source for an experiment.
+Inspect ContextDP's annotations and source identities for the first experiment. Consider Dark Patterns at Scale and custom labeled screenshots for later expansion after checking their modalities and annotations.
 
 Define a shared representation for screenshot identity, source domain, extracted text, UI elements, bounding boxes, and category labels. Record which samples have localization annotations and which require additional context. Reconcile label differences before combining datasets.
 
@@ -97,7 +109,7 @@ Report performance by category, ablation results, and representative errors with
 ## Decisions before implementation
 
 - Choose the first deliverable: cancellation-focused MVP, a baseline experiment, or the broader research pipeline.
-- Select datasets and reconcile category labels, negative examples, and insufficient-evidence annotations.
+- Confirm ContextDP's suitability after inspecting its labels, negative examples, source identities, and available reuse terms; reconcile its categories with the project taxonomy.
 - Confirm available compute and whether models run locally or use a hosted API.
 - Select a fusion architecture and the supervision available for localization.
 - Decide whether the deliverable needs a CLI, notebooks, an API, or an interactive demo.
