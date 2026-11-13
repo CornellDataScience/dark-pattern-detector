@@ -4,8 +4,12 @@ version = "0.1.0"
 description = "Screenshot-based dark pattern detection research"
 requires-python = ">=3.11,<3.12"
 dependencies = [
+    "pillow>=13.0.0",
     "scikit-learn>=1.6,<2",
+    # Required by the Hugging Face HTTP client when ALL_PROXY uses SOCKS.
+    "socksio>=1.0.0",
     "torch>=2.6,<3",
+    "transformers>=5.23.0",
 ]
 
 [tool.uv]

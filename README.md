@@ -6,7 +6,7 @@ Based on [Misleading Patterns — CDS Onboarding](https://docs.google.com/docume
 
 ## Status and scope
 
-**Environment setup ready; implementation pending.** The repository includes the research outline, a [four-owner implementation plan](IMPLEMENTATION_PLAN.md), and a shared Python environment. Baseline and model code are the next tasks.
+**Task 4 implemented: CLIP screenshot encoding and fusion forward/backward checks.** The repository includes the research outline, a [four-owner implementation plan](IMPLEMENTATION_PLAN.md), and a shared Python environment. See the [visual encoder progress report](reports/visual_encoder_progress.md) for results. Baseline, UI parsing, and the OmniParser-to-embedding adapter remain pending.
 
 ## Development setup
 
@@ -22,17 +22,15 @@ Use **Python 3.11**, **uv** for environment/dependency management, **scikit-lear
 
 `uv` manages `.venv/` and selects Python 3.11 using `.python-version`. Commit `pyproject.toml`, `uv.lock`, and `.python-version`; keep the environment and raw `dataset/` directory out of Git. See the [uv project guide](https://docs.astral.sh/uv/guides/projects/) for environment and lockfile behavior.
 
-### Code to write for the first milestone
+### First milestone
 
-The environment configuration is sufficient to start; the four owners will create the files assigned in [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md). Once those files exist, run them through the shared environment:
+Run the CLIP screenshot encoder and fusion demonstration through the shared environment:
 
 ```sh
-uv run python baseline.py --data examples/baseline_sample.jsonl
-uv run python ui_encoder.py
-uv run python fusion_model.py
+uv run python fusion_model.py --image dataset/web/images/knockaround.com.png
 ```
 
-These implementation commands are planned and will work after their respective owners deliver the scripts. OmniParser, CLIP, and MiniLM integration is deferred; add their dependencies when that work begins. Use `uv add PACKAGE` for agreed new dependencies and commit both the updated project file and lockfile.
+Supply a local screenshot path; `dataset/` is ignored by Git. The first run downloads the pinned CLIP checkpoint into the Hugging Face cache. The demonstration uses synthetic UI tokens and a demonstration target, and checks finite logits, backward gradients, and frozen CLIP parameters. Baseline and OmniParser parsing are assigned separately in [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md); the UI embedding adapter and MiniLM integration remain deferred. Use `uv add PACKAGE` for agreed new dependencies and commit both the updated project file and lockfile.
 
 ## Research objective
 

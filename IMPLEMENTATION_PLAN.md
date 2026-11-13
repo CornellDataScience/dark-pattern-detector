@@ -110,11 +110,13 @@ Use **OpenAI CLIP ViT-B/32**, checkpoint **`openai/clip-vit-base-patch32`**, thr
 
 ### Finished when
 
-- [ ] `uv run python fusion_model.py --image PATH` extracts real CLIP features from a screenshot and returns finite logits of shape `[1,1]`.
-- [ ] The CLIP feature shape is `[1,512]`, and the checkpoint processor is used.
-- [ ] Backward produces finite, nonzero classifier gradients; CLIP parameters remain frozen with no gradients.
-- [ ] The classifier accepts the documented `[B,N,256]` UI-token interface. Synthetic UI tokens and the pending OmniParser embedding step are explicitly identified.
-- [ ] The progress note records dependencies, checkpoint revision, command, and observed tensor shapes.
+- [x] `uv run python fusion_model.py --image PATH` extracts real CLIP features from a screenshot and returns finite logits of shape `[1,1]`.
+- [x] The CLIP feature shape is `[1,512]`, and the checkpoint processor is used.
+- [x] Backward produces finite, nonzero classifier gradients; CLIP parameters remain frozen with no gradients.
+- [x] The classifier accepts the documented `[B,N,256]` UI-token interface. Synthetic UI tokens and the pending OmniParser embedding step are explicitly identified.
+- [x] The progress note records dependencies, checkpoint revision, command, and observed tensor shapes.
+
+Completed 2026-11-13; see [observed results and reproduction commands](reports/visual_encoder_progress.md).
 
 **Time limit:** If weight downloads or setup block progress, finish the fusion module with synthetic image/UI features and record the blocker. Report fusion-skeleton completion separately from successful real-image encoding.
 
