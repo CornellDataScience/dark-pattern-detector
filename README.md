@@ -6,9 +6,33 @@ Based on [Misleading Patterns — CDS Onboarding](https://docs.google.com/docume
 
 ## Status and scope
 
-**Documentation only.** The repository currently contains this project outline and a `.gitignore`. No parsing pipeline, models, datasets, application, or evaluation results are included. There are no installation or run commands yet.
+**Environment setup ready; implementation pending.** The repository includes the research outline, a [four-owner implementation plan](IMPLEMENTATION_PLAN.md), and a shared Python environment. Baseline and model code are the next tasks.
 
-The current scope is repository setup and documentation of the architecture and research plan. All components below are proposed; implementation choices remain open.
+## Development setup
+
+Use **Python 3.11**, **uv** for environment/dependency management, **scikit-learn** for TF-IDF and logistic regression, and **PyTorch** for the UI encoder and transformer. The one-hour prototype runs on CPU; no GPU is required.
+
+1. Install uv using the [official installation instructions](https://docs.astral.sh/uv/getting-started/installation/).
+2. From the repository root, create the environment and install the locked dependencies:
+
+   ```sh
+   uv sync --locked
+   ```
+
+
+`uv` manages `.venv/` and selects Python 3.11 using `.python-version`. Commit `pyproject.toml`, `uv.lock`, and `.python-version`; keep the environment and raw `dataset/` directory out of Git. See the [uv project guide](https://docs.astral.sh/uv/guides/projects/) for environment and lockfile behavior.
+
+### Code to write for the first milestone
+
+The environment configuration is sufficient to start; the four owners will create the files assigned in [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md). Once those files exist, run them through the shared environment:
+
+```sh
+uv run python baseline.py --data examples/baseline_sample.jsonl
+uv run python ui_encoder.py
+uv run python fusion_model.py
+```
+
+These implementation commands are planned and will work after their respective owners deliver the scripts. OmniParser, CLIP, and MiniLM integration is deferred; add their dependencies when that work begins. Use `uv add PACKAGE` for agreed new dependencies and commit both the updated project file and lockfile.
 
 ## Research objective
 
