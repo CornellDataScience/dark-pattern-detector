@@ -59,3 +59,22 @@ The CLI checks these conditions before printing `checks_passed: true`. A separat
 The checkpoint processor resizes the short edge to 224 pixels, center-crops to 224 × 224, and applies its saved normalization. Wide screenshots lose left/right content and tall screenshots lose top/bottom content. The original screenshot is preserved; alternative resizing is deferred. See the [Transformers CLIP documentation](https://huggingface.co/docs/transformers/model_doc/clip#transformers.CLIPImageProcessor).
 
 The next integration step is to convert Owner 3's OmniParser text/box records into real `[B,N,256]` UI embeddings. UI tokens remain synthetic in this demonstration. Dataset-wide training and meaningful detection evaluation remain deferred.
+
+## Reverification — 2026-11-14
+
+The real-image command above passed again on macOS 27.2.1 with the same checkpoint,
+feature/logit shapes, loss `1.1494634151`, and classifier gradient norm
+`10.9310417175`. CLIP remained in evaluation mode with frozen parameters and no
+gradients. Local output is `dataset/fusion-verification.json`; loading diagnostics
+are in `dataset/fusion-verification.log`.
+
+The former manual `B=2, N=4` checks are now reproducible without downloading weights:
+
+```sh
+uv run python -m unittest discover -s tests -p 'test_fusion_model.py' -v
+```
+
+Both tests passed: binary-loss gradients reach both input branches and all fusion
+parameters; evaluation is repeatable, independent across batch members, and
+responds to changes in either input branch. The existing fusion implementation
+needed no changes. `uv lock --check` also passed.
