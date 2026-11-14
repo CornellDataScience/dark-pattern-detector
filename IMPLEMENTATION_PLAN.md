@@ -16,6 +16,11 @@ and fusion forward/backward.
 | UI parsing | [Setup, real outputs, and visual checks](reports/omniparser_progress.md) |
 | CLIP and fusion | [Feature extraction and gradient checks](reports/visual_encoder_progress.md) |
 
+Follow-up: merged `data-real-examples` while preserving both dataset samples.
+The full Yada et al. text baseline now trains on 1,693 deduplicated texts and evaluates
+565 page-grouped held-out texts: accuracy 94.16%, macro-F1 0.9414, AUROC 0.9832.
+All 18 tests pass. See the [full evaluation](reports/baseline_progress.md#full-corpus-evaluation--2026-11-14).
+
 Data-to-baseline integration is complete. Parsed UI output is available at
 `dataset/parsed/web-6/elements.json`; [the UI adapter](ui_encoder.py) now converts
 its text and boxes into `[B,N,256]` tokens with boolean padding masks. See the
@@ -150,4 +155,4 @@ Each owner shows their file, the check they ran, and one next step. Owner 1 hand
 
 ## Deferred
 
-Full dataset download/audit, dataset-wide OmniParser processing, dataset-wide CLIP feature extraction, element crops, multi-label classification, full model training, checkpoints, meaningful evaluation, localization, and a frontend. UI embeddings and padding masks were completed in the follow-up integration above.
+Full ContextDP download/audit, dataset-wide OmniParser processing, dataset-wide CLIP feature extraction, element crops, multi-label classification, multimodal model training/evaluation, checkpoints, localization, and a frontend. UI embeddings and padding masks were completed in the follow-up integration above. The separate Yada et al. text corpus has now been audited and evaluated with TF-IDF/logistic regression.

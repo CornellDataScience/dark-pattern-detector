@@ -6,7 +6,7 @@ Based on [Misleading Patterns — CDS Onboarding](https://docs.google.com/docume
 
 ## Status and scope
 
-**All four implementation-plan tasks and UI embedding integration completed.** The prototype includes eight real ContextDP text examples, a TF-IDF/logistic-regression baseline, a working OmniParser screenshot wrapper, and CLIP screenshot encoding with fusion forward/backward checks. The UI adapter now encodes real parsed text and boxes with frozen MiniLM and a trainable projection, including padding masks. See the [implementation plan](IMPLEMENTATION_PLAN.md) and the [data](reports/data_progress.md), [baseline](reports/baseline_progress.md), [UI parsing](reports/omniparser_progress.md), and [visual encoder](reports/visual_encoder_progress.md) reports. Model training and meaningful evaluation remain deferred.
+**All four implementation-plan tasks and UI embedding integration completed; the full text baseline is evaluated.** The prototype includes eight real ContextDP text examples, a TF-IDF/logistic-regression baseline, a working OmniParser screenshot wrapper, and CLIP screenshot encoding with fusion forward/backward checks. The merged data branch adds 12 labeled e-commerce text examples and their preparation script. Training on the full e-commerce corpus produced 94.16% accuracy and 0.9414 macro-F1 on a page-grouped holdout of 565 texts. The UI adapter encodes real parsed text and boxes with frozen MiniLM and a trainable projection, including padding masks. See the [implementation plan](IMPLEMENTATION_PLAN.md) and the [data](reports/data_progress.md), [baseline](reports/baseline_progress.md), [UI parsing](reports/omniparser_progress.md), and [visual encoder](reports/visual_encoder_progress.md) reports. Multimodal training and evaluation remain deferred.
 
 ## Development setup
 
@@ -36,6 +36,27 @@ training text. It prints held-out texts, true labels, and predictions. The eight
 manual transcriptions are tracked in `examples/baseline_sample.jsonl`; their
 screenshot IDs and inherited labels are documented in the data report. The tiny
 sample checks execution rather than model performance.
+
+### Full text baseline
+
+The [Yada et al. corpus](https://github.com/yamanalab/ec-darkpattern) provides labeled
+e-commerce text. Download its pinned TSV and regenerate the separate 12-row sample,
+then evaluate the full corpus:
+
+```sh
+uv run python scripts/prepare_real_dataset_sample.py
+uv run python baseline.py --data examples/ec_darkpattern_sample.jsonl
+uv run python baseline.py --ec-darkpattern dataset/ec-darkpattern/dataset.tsv \
+  --output dataset/ec-darkpattern/baseline_result.json
+```
+
+The full run uses all 2,356 source rows before removing 98 normalized-text duplicates.
+Pages sharing duplicate text stay together. A fixed grouped split (seed 42) yields
+1,693 training and 565 held-out texts, with TF-IDF fitted only on training text.
+The JSON records dataset checksum, split IDs, leakage checks, metrics, a majority-class
+comparison, and held-out probabilities. See the [results and limitations](reports/baseline_progress.md#full-corpus-evaluation--2026-11-14).
+
+### Screenshot and fusion demonstration
 
 First export the screenshot's UI elements with OmniParser, following the
 [isolated environment and weight setup](reports/omniparser_progress.md):
@@ -93,8 +114,9 @@ batch uses `[B,0,256]` tokens. MiniLM remains frozen and in evaluation mode when
 the adapter is switched to training; train the adapter's projection alongside
 the fusion model.
 
-All 15 automated tests run without model downloads and cover pooling, geometry,
-variable-length batches, empty UI, padding invariance, and gradient isolation.
+All 18 automated tests run without model downloads and cover sample integration,
+grouped splitting, duplicate handling, metrics, pooling, geometry, variable-length
+batches, empty UI, padding invariance, and gradient isolation.
 
 ## Research objective
 
