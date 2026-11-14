@@ -6,7 +6,7 @@ Based on [Misleading Patterns — CDS Onboarding](https://docs.google.com/docume
 
 ## Status and scope
 
-**All four implementation-plan tasks completed.** The prototype includes eight real ContextDP text examples, a TF-IDF/logistic-regression baseline, a working OmniParser screenshot wrapper, and CLIP screenshot encoding with fusion forward/backward checks. See the [implementation plan](IMPLEMENTATION_PLAN.md) and the [data](reports/data_progress.md), [baseline](reports/baseline_progress.md), [UI parsing](reports/omniparser_progress.md), and [visual encoder](reports/visual_encoder_progress.md) reports. The OmniParser-to-embedding adapter and meaningful model evaluation remain deferred.
+**All four implementation-plan tasks and UI embedding integration completed.** The prototype includes eight real ContextDP text examples, a TF-IDF/logistic-regression baseline, a working OmniParser screenshot wrapper, and CLIP screenshot encoding with fusion forward/backward checks. The UI adapter now encodes real parsed text and boxes with frozen MiniLM and a trainable projection, including padding masks. See the [implementation plan](IMPLEMENTATION_PLAN.md) and the [data](reports/data_progress.md), [baseline](reports/baseline_progress.md), [UI parsing](reports/omniparser_progress.md), and [visual encoder](reports/visual_encoder_progress.md) reports. Model training and meaningful evaluation remain deferred.
 
 ## Development setup
 
@@ -37,15 +37,8 @@ manual transcriptions are tracked in `examples/baseline_sample.jsonl`; their
 screenshot IDs and inherited labels are documented in the data report. The tiny
 sample checks execution rather than model performance.
 
-Run the CLIP screenshot encoder and fusion demonstration:
-
-```sh
-uv run python fusion_model.py --image dataset/web/images/knockaround.com.png
-```
-
-Supply a local screenshot path; `dataset/` is ignored by Git. The first run downloads the pinned CLIP checkpoint into the Hugging Face cache. The demonstration uses synthetic UI tokens and a demonstration target, and checks finite logits, backward gradients, and frozen CLIP parameters.
-
-For OmniParser, follow the [isolated environment and weight setup](reports/omniparser_progress.md), then run:
+First export the screenshot's UI elements with OmniParser, following the
+[isolated environment and weight setup](reports/omniparser_progress.md):
 
 ```sh
 dataset/.venv-omniparser/bin/python parse_ui.py \
@@ -57,8 +50,51 @@ The wrapper saves `elements.json` with normalized `[x1,y1,x2,y2]` boxes,
 `native.json` with OCR/caption provenance, and `annotated.png`. The report includes
 a screenshot download command and observed parsing errors. OmniParser runs in a
 separate Python 3.12 environment because its inference dependencies use
-Transformers 4; the shared CLIP environment uses Transformers 5. The UI embedding
-adapter and MiniLM integration remain deferred.
+Transformers 4; the shared CLIP/MiniLM environment uses Transformers 5.
+
+Run the screenshot and its exported elements through fusion:
+
+```sh
+uv run python fusion_model.py \
+  --image dataset/web/images/knockaround.com.png \
+  --elements dataset/parsed/web-6/elements.json
+```
+
+The first run downloads pinned CLIP and MiniLM checkpoints into the Hugging Face
+cache. The demonstration checks finite logits and backward gradients through the
+UI projection and fusion model, while both pretrained encoders remain frozen.
+It uses a demonstration target; the adapter projection and classifier are untrained.
+The real `web:6` run produced `[1,59,256]` UI tokens and `[1,1]` logits and passed
+all forward/backward checks.
+
+### UI embeddings and padding
+
+[`ui_encoder.py`](ui_encoder.py) loads the parser's `{sample_id, elements}` JSON
+and preserves element order, text, and normalized `[x1,y1,x2,y2]` boxes.
+[MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)
+provides a 384-dimensional text embedding using attention-masked mean pooling and
+L2 normalization. Each text is truncated to 256 wordpieces. A trainable linear
+projection maps the text embedding plus four box coordinates (`388 → 256`) to a
+UI token. OCR text and generated descriptions are embedded as exported;
+`native.json` retains their provenance. No element-count truncation is applied.
+
+`load_ui_adapter()` returns an adapter whose forward method accepts a list of
+records from `load_ui_record(path)` or `parse_ui.export_elements(...)`:
+
+```python
+ui_tokens, ui_padding_mask = adapter(records)
+logits = model(ui_tokens, image_features, ui_padding_mask)
+```
+
+Tokens have shape `[B,N,256]`, where `N` is the largest element count in the batch.
+The boolean mask has shape `[B,N]`; `True` marks padding. Fusion prepends an
+unmasked image token, so empty element lists remain valid. An entirely empty-UI
+batch uses `[B,0,256]` tokens. MiniLM remains frozen and in evaluation mode when
+the adapter is switched to training; train the adapter's projection alongside
+the fusion model.
+
+All 15 automated tests run without model downloads and cover pooling, geometry,
+variable-length batches, empty UI, padding invariance, and gradient isolation.
 
 ## Research objective
 

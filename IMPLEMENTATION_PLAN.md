@@ -4,8 +4,10 @@
 
 All four tasks are complete. The eight real ContextDP transcriptions feed the
 baseline; OmniParser parsed `web:6` into 59 validated text/box records; the existing
-CLIP/fusion demonstration passed again. Seven automated tests cover data loading,
-training-only vocabulary fitting, parser export, and fusion forward/backward.
+CLIP/fusion demonstration passed again. The follow-up UI adapter integration also
+passed with these 59 real elements. Fifteen automated tests cover data loading,
+training-only vocabulary fitting, parser export, UI embeddings, padding masks,
+and fusion forward/backward.
 
 | Function | Implementation and observed checks |
 | --- | --- |
@@ -15,8 +17,10 @@ training-only vocabulary fitting, parser export, and fusion forward/backward.
 | CLIP and fusion | [Feature extraction and gradient checks](reports/visual_encoder_progress.md) |
 
 Data-to-baseline integration is complete. Parsed UI output is available at
-`dataset/parsed/web-6/elements.json`; conversion to UI embeddings remains deferred
-as specified below. The original one-hour work allocation follows.
+`dataset/parsed/web-6/elements.json`; [the UI adapter](ui_encoder.py) now converts
+its text and boxes into `[B,N,256]` tokens with boolean padding masks. See the
+[current run instructions](README.md#first-milestone). The original one-hour work
+allocation below records the earlier scope, including its synthetic-token demo.
 
 ## Target for the next update
 
@@ -146,4 +150,4 @@ Each owner shows their file, the check they ran, and one next step. Owner 1 hand
 
 ## Deferred
 
-Full dataset download/audit, dataset-wide OmniParser processing, conversion of parsed elements into UI embeddings, dataset-wide CLIP feature extraction, element crops, padding masks, multi-label classification, full model training, checkpoints, meaningful evaluation, localization, and a frontend.
+Full dataset download/audit, dataset-wide OmniParser processing, dataset-wide CLIP feature extraction, element crops, multi-label classification, full model training, checkpoints, meaningful evaluation, localization, and a frontend. UI embeddings and padding masks were completed in the follow-up integration above.
