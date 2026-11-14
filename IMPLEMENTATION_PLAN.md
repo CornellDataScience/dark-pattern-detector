@@ -1,5 +1,23 @@
 # Four-owner, one-hour work plan
 
+## Implementation status — 2026-11-14
+
+All four tasks are complete. The eight real ContextDP transcriptions feed the
+baseline; OmniParser parsed `web:6` into 59 validated text/box records; the existing
+CLIP/fusion demonstration passed again. Seven automated tests cover data loading,
+training-only vocabulary fitting, parser export, and fusion forward/backward.
+
+| Function | Implementation and observed checks |
+| --- | --- |
+| Sample data | [Eight examples and provenance](reports/data_progress.md) |
+| Text baseline | [Training split and held-out predictions](reports/baseline_progress.md) |
+| UI parsing | [Setup, real outputs, and visual checks](reports/omniparser_progress.md) |
+| CLIP and fusion | [Feature extraction and gradient checks](reports/visual_encoder_progress.md) |
+
+Data-to-baseline integration is complete. Parsed UI output is available at
+`dataset/parsed/web-6/elements.json`; conversion to UI embeddings remains deferred
+as specified below. The original one-hour work allocation follows.
+
 ## Target for the next update
 
 Each owner spends **one hour**, working in parallel. Deliver a small text baseline and a minimal multimodal computation graph. This is an implementation milestone; meaningful model evaluation comes later.
@@ -38,10 +56,10 @@ Use `source: "manual_transcription"` and the original screenshot ID for real exa
 
 ### Finished when
 
-- [ ] JSONL loads successfully and contains 8–12 examples, at least four per label.
-- [ ] Each record has the four fields in the shared contract and a unique ID.
-- [ ] Real examples are traceable to screenshots; synthetic examples are clearly marked.
-- [ ] Owner 2 has the file location and the provenance/count note.
+- [x] JSONL loads successfully and contains 8–12 examples, at least four per label.
+- [x] Each record has the four fields in the shared contract and a unique ID.
+- [x] Real examples are traceable to screenshots; synthetic examples are clearly marked.
+- [x] Owner 2 has the file location and the provenance/count note.
 
 **Update artifact:** the sample and a brief explanation of its labels. If synthetic, state that real-data preparation remains pending.
 
@@ -57,10 +75,10 @@ Use `source: "manual_transcription"` and the original screenshot ID for real exa
 
 ### Finished when
 
-- [ ] `python baseline.py --data examples/baseline_sample.jsonl` loads the agreed format and runs training/prediction when that file is available.
-- [ ] A demonstrated run completes on a labeled sample with both labels in training and held-out partitions.
-- [ ] TF-IDF is fitted only on training text.
-- [ ] The docstring gives dependencies, command, and whether the demonstrated run used real or synthetic data.
+- [x] `python baseline.py --data examples/baseline_sample.jsonl` loads the agreed format and runs training/prediction when that file is available.
+- [x] A demonstrated run completes on a labeled sample with both labels in training and held-out partitions.
+- [x] TF-IDF is fitted only on training text.
+- [x] The docstring gives dependencies, command, and whether the demonstrated run used real or synthetic data.
 
 **Update artifact:** executable script and held-out predictions. These tiny-sample predictions are a pipeline check, not a performance benchmark. Report integration with Owner 1 separately if it remains pending.
 
@@ -78,10 +96,10 @@ Use [Microsoft OmniParser](https://github.com/microsoft/OmniParser) as the UI co
 
 ### Finished when
 
-- [ ] OmniParser successfully processes one real screenshot.
-- [ ] A saved JSON record contains element text/content and normalized bounding boxes, with the screenshot ID and text provenance documented.
-- [ ] Several extracted elements have been visually checked against the screenshot.
-- [ ] The progress note contains reproducible commands, versions, and local output locations for Owner 4.
+- [x] OmniParser successfully processes one real screenshot.
+- [x] A saved JSON record contains element text/content and normalized bounding boxes, with the screenshot ID and text provenance documented.
+- [x] Several extracted elements have been visually checked against the screenshot.
+- [x] The progress note contains reproducible commands, versions, and local output locations for Owner 4.
 
 **Time limit:** Stop after one hour. If installation or model downloads block inference, record the exact blocker and next command to try. Report setup progress rather than claiming successful parsing. A custom encoder is not a substitute for this task.
 

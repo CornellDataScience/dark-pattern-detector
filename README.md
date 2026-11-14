@@ -6,7 +6,7 @@ Based on [Misleading Patterns — CDS Onboarding](https://docs.google.com/docume
 
 ## Status and scope
 
-**Task 4 implemented: CLIP screenshot encoding and fusion forward/backward checks.** The repository includes the research outline, a [four-owner implementation plan](IMPLEMENTATION_PLAN.md), and a shared Python environment. See the [visual encoder progress report](reports/visual_encoder_progress.md) for results. Baseline, UI parsing, and the OmniParser-to-embedding adapter remain pending.
+**All four implementation-plan tasks completed.** The prototype includes eight real ContextDP text examples, a TF-IDF/logistic-regression baseline, a working OmniParser screenshot wrapper, and CLIP screenshot encoding with fusion forward/backward checks. See the [implementation plan](IMPLEMENTATION_PLAN.md) and the [data](reports/data_progress.md), [baseline](reports/baseline_progress.md), [UI parsing](reports/omniparser_progress.md), and [visual encoder](reports/visual_encoder_progress.md) reports. The OmniParser-to-embedding adapter and meaningful model evaluation remain deferred.
 
 ## Development setup
 
@@ -24,13 +24,41 @@ Use **Python 3.11**, **uv** for environment/dependency management, **scikit-lear
 
 ### First milestone
 
-Run the CLIP screenshot encoder and fusion demonstration through the shared environment:
+Run the text baseline and automated checks through the shared environment:
+
+```sh
+uv run python baseline.py --data examples/baseline_sample.jsonl
+uv run python -m unittest discover -s tests -v
+```
+
+The baseline uses a stratified 75/25 split with seed 42 and fits TF-IDF only on
+training text. It prints held-out texts, true labels, and predictions. The eight
+manual transcriptions are tracked in `examples/baseline_sample.jsonl`; their
+screenshot IDs and inherited labels are documented in the data report. The tiny
+sample checks execution rather than model performance.
+
+Run the CLIP screenshot encoder and fusion demonstration:
 
 ```sh
 uv run python fusion_model.py --image dataset/web/images/knockaround.com.png
 ```
 
-Supply a local screenshot path; `dataset/` is ignored by Git. The first run downloads the pinned CLIP checkpoint into the Hugging Face cache. The demonstration uses synthetic UI tokens and a demonstration target, and checks finite logits, backward gradients, and frozen CLIP parameters. Baseline and OmniParser parsing are assigned separately in [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md); the UI embedding adapter and MiniLM integration remain deferred. Use `uv add PACKAGE` for agreed new dependencies and commit both the updated project file and lockfile.
+Supply a local screenshot path; `dataset/` is ignored by Git. The first run downloads the pinned CLIP checkpoint into the Hugging Face cache. The demonstration uses synthetic UI tokens and a demonstration target, and checks finite logits, backward gradients, and frozen CLIP parameters.
+
+For OmniParser, follow the [isolated environment and weight setup](reports/omniparser_progress.md), then run:
+
+```sh
+dataset/.venv-omniparser/bin/python parse_ui.py \
+  --image dataset/web/images/knockaround.com.png --sample-id web:6 \
+  --output-dir dataset/parsed/web-6
+```
+
+The wrapper saves `elements.json` with normalized `[x1,y1,x2,y2]` boxes,
+`native.json` with OCR/caption provenance, and `annotated.png`. The report includes
+a screenshot download command and observed parsing errors. OmniParser runs in a
+separate Python 3.12 environment because its inference dependencies use
+Transformers 4; the shared CLIP environment uses Transformers 5. The UI embedding
+adapter and MiniLM integration remain deferred.
 
 ## Research objective
 
@@ -94,7 +122,7 @@ The source contains two related transformer designs: one combines element tokens
 - **Text:** The inspected annotation files do not include transcribed UI text. Extract it from screenshots with OCR or OmniParser for the text baseline and review extraction quality.
 - **Scope and limitations:** ContextDP is small and consists of static screenshots. It cannot establish behavior across a user journey, such as whether cancellation succeeds. Check category frequencies and source identities before creating splits; group related screenshots by website or app where that information is available. Confirm dataset reuse terms before redistribution or publication; the repository's code license does not by itself establish rights to every screenshot.
 
-The source README reports 544 instances, while the two annotation files contain 546 annotation records in total. Resolve this discrepancy and inspect `NO DP` annotations before calculating class counts or interpreting negatives. The dataset has not yet been imported or processed in this project.
+The source README reports 544 instances, while the two annotation files contain 546 annotation records in total. Resolve this discrepancy before dataset-wide evaluation. This milestone verified `NO DP`-only labels for four negative web examples, transcribed eight screenshots, and processed one screenshot through OmniParser and CLIP. A full dataset audit remains pending.
 
 ### 1. Prepare and standardize data
 
@@ -128,9 +156,9 @@ Run ablations that remove the visual, textual, and structural branches individua
 
 Report performance by category, ablation results, and representative errors with supporting screenshots or UI regions. Document dataset versions, splits, preprocessing, model configurations, random seeds, and decision thresholds alongside each experiment. Report insufficient-evidence outcomes separately so they are not silently counted as clean interfaces.
 
-## Decisions before implementation
+## Decisions before broader experiments
 
-- Choose the first deliverable: cancellation-focused MVP, a baseline experiment, or the broader research pipeline.
+- Choose the next deliverable after this prototype: cancellation-focused MVP, a baseline experiment, or the broader research pipeline.
 - Confirm ContextDP's suitability after inspecting its labels, negative examples, source identities, and available reuse terms; reconcile its categories with the project taxonomy.
 - Confirm available compute and whether models run locally or use a hosted API.
 - Select a fusion architecture and the supervision available for localization.
@@ -143,4 +171,6 @@ Report performance by category, ablation results, and representative errors with
 - [Microsoft OmniParser](https://github.com/microsoft/OmniParser)
 - [Dark Patterns at Scale data](https://github.com/aruneshmathur/dark-patterns/tree/master/data)
 
-These are references from the onboarding document; no external code, model weights, or datasets have been incorporated into this repository.
+The prototype uses ContextDP screenshots, Microsoft OmniParser, and OpenAI CLIP.
+External source checkouts, screenshots, and generated parsing outputs stay under
+the ignored `dataset/` directory; CLIP weights use the Hugging Face cache.
